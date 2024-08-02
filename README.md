@@ -1,2 +1,3 @@
 # projeto-fokus
-Projeto Fokus
+
+Projeto Fokus do curso de manipulação de elementos da DOM da Alura.
