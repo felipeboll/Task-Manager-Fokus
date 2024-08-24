@@ -2,9 +2,14 @@ const btnAdicionarTarefa = document.querySelector('.app__button--add-task');
 const formAdicionarTarefa = document.querySelector('.app__form-add-task');
 const textArea = document.querySelector('.app__form-textarea');
 const ulTarefas = document.querySelector('.app__section-task-list');
+const btnCancelarTarefa = document.querySelector('.app__form-footer__button--cancel')
 
 //O || verifica se a local storage está vazia e atribue []
 const tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+
+function atualizarLocalStorage(){
+    localStorage.setItem('tarefas', JSON.stringify(tarefas));
+}
 
 btnAdicionarTarefa.addEventListener('click', () =>{
     formAdicionarTarefa.classList.toggle('hidden');
@@ -28,6 +33,17 @@ function criaElementoTarefa(tarefa){
     const botao = document.createElement('button');
     botao.classList.add('app_button-edit');
 
+    botao.onclick = function(){
+        const novaDescricao = prompt('Altere o texto da tarefa:');
+        //temos que atribuir o valor no objeto, pois a DOM mostra a partir dele.
+        //Da mesma forma devemos atribuir p.textContent pq se não p é toda a linha HTML e não só o conteudo
+        if (novaDescricao) {
+            p.textContent = novaDescricao;
+            tarefa.descricaoTarefa=novaDescricao;
+            atualizarLocalStorage(); 
+        }
+    }
+
     const img = document.createElement('img');
     img.setAttribute('src', './imagens/edit.png');
 
@@ -48,11 +64,16 @@ formAdicionarTarefa.addEventListener('submit', (evento)=>{
     tarefas.push(tarefa);
     adicionarTarefa(tarefa);
     textArea.value = '';
-
-    localStorage.setItem('tarefas', JSON.stringify(tarefas));
+    
+    atualizarLocalStorage();
     formAdicionarTarefa.classList.add('hidden');
 
 });
+
+btnCancelarTarefa.addEventListener('click', ()=>{
+    textArea.value = '';
+    formAdicionarTarefa.classList.add('hidden');
+})
 
 tarefas.forEach(tarefa => {
     adicionarTarefa(tarefa);
