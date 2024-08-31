@@ -2,10 +2,18 @@ const btnAdicionarTarefa = document.querySelector('.app__button--add-task');
 const formAdicionarTarefa = document.querySelector('.app__form-add-task');
 const textArea = document.querySelector('.app__form-textarea');
 const ulTarefas = document.querySelector('.app__section-task-list');
-const btnCancelarTarefa = document.querySelector('.app__form-footer__button--cancel')
+const btnCancelarTarefa = document.querySelector('.app__form-footer__button--cancel');
+const paragrafoDescricaoTarefa = document.querySelector('.app__section-active-task-description');
+
+const btnLimparTarefasConcluidas = document.getElementById('btn-remover-concluidas');
+const btnLimparTodasTarefas = document.getElementById('btn-remover-todas');
+
+let tarefaSelecionada = null;
+let liTarefaSelecionada = null;
+
 
 //O || verifica se a local storage está vazia e atribue []
-const tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
+let tarefas = JSON.parse(localStorage.getItem('tarefas')) || [];
 
 function atualizarLocalStorage(){
     localStorage.setItem('tarefas', JSON.stringify(tarefas));
@@ -33,7 +41,9 @@ function criaElementoTarefa(tarefa){
     const botao = document.createElement('button');
     botao.classList.add('app_button-edit');
 
+   
     botao.onclick = function(){
+
         const novaDescricao = prompt('Altere o texto da tarefa:');
         //temos que atribuir o valor no objeto, pois a DOM mostra a partir dele.
         //Da mesma forma devemos atribuir p.textContent pq se não p é toda a linha HTML e não só o conteudo
@@ -44,6 +54,8 @@ function criaElementoTarefa(tarefa){
         }
     }
 
+    
+
     const img = document.createElement('img');
     img.setAttribute('src', './imagens/edit.png');
 
@@ -53,8 +65,52 @@ function criaElementoTarefa(tarefa){
     li.append(p);
     li.append(botao);
 
+    if(tarefa.completa){
+        li.classList.add('app__section-task-list-item-complete');
+        botao.setAttribute('disabled', 'disabled');
+    }else{
+
+    li.onclick = ()=>{
+
+        document.querySelectorAll('.app__section-task-list-item-active').forEach(elemento => {
+            elemento.classList.remove('app__section-task-list-item-active');
+        });
+
+        if(tarefaSelecionada == tarefa){
+            li.classList.remove('app__section-task-list-item-active');
+            paragrafoDescricaoTarefa.textContent = '';
+            tarefaSelecionada = null;
+            liTarefaSelecionada = null;
+            return;
+        }
+
+
+        tarefaSelecionada = tarefa;
+        liTarefaSelecionada = li;
+
+        /* Não necessariamente tem que ficar aqui, pode ficar fora da funçao li.onclick
+        Ele funciona da mesma maneira, pois o eventListener esta sempre "ouvindo" no escopo global */
+        document.addEventListener('FocoFinalizado', () => {
+
+            liTarefaSelecionada.classList.remove('app__section-task-list-item-active');
+            liTarefaSelecionada.classList.add('app__section-task-list-item-complete');
+            liTarefaSelecionada.querySelector('button').setAttribute('disabled', 'disabled');
+            tarefa.completa = true;
+            atualizarLocalStorage();
+        })
+
+        paragrafoDescricaoTarefa.textContent = p.textContent;
+
+        li.classList.add('app__section-task-list-item-active');
+    }
+    }
+  
+    
+
     return li;
 }
+
+
 
 formAdicionarTarefa.addEventListener('submit', (evento)=>{
     evento.preventDefault();
@@ -75,6 +131,7 @@ btnCancelarTarefa.addEventListener('click', ()=>{
     formAdicionarTarefa.classList.add('hidden');
 })
 
+//função que chama cada tarefa para crialas
 tarefas.forEach(tarefa => {
     adicionarTarefa(tarefa);
 });
@@ -84,3 +141,27 @@ function adicionarTarefa(tarefa){
     const elementoTarefa = criaElementoTarefa(tarefa);      
     ulTarefas.append(elementoTarefa);
 }
+
+
+btnLimparTarefasConcluidas.addEventListener('click', () => {
+   
+    tarefas = tarefas.filter(tarefa => !tarefa.completa)
+    document.querySelectorAll('.app__section-task-list-item-complete').forEach(elemento => {
+        elemento.remove();
+    });
+
+    atualizarLocalStorage();
+
+});
+
+btnLimparTodasTarefas.addEventListener('click', () => {
+
+    tarefas.pop()
+    document.querySelectorAll('.app__section-task-list-item').forEach(elemento => {
+        elemento.remove();
+    });
+
+    atualizarLocalStorage();
+
+});
+

@@ -11,7 +11,8 @@ const iniciarOuPausarBtn = document.querySelector('#start-pause span');
 const iconeBtn = document.querySelector('.app__card-primary-butto-icon');
 const tempoNaTela = document.querySelector('#timer');
 
-let tempoDecorridoEmSegundos = 1500;
+
+let tempoDecorridoEmSegundos = 10;
 let intervaloId = null;
 
 const musica = new Audio('./sons/luna-rise-part-one.mp3');
@@ -31,7 +32,7 @@ musicaFocoInput.addEventListener('change', () =>{
 
 
 focoBt.addEventListener('click', () => {
-    tempoDecorridoEmSegundos = 1500;
+    tempoDecorridoEmSegundos = 10;
     alterarContexto('foco');
     focoBt.classList.add('active');
 });
@@ -82,6 +83,10 @@ const contagemRegressiva = () => {
     if(tempoDecorridoEmSegundos <= 0){
         somBeep.play();
         alert('Tempo finalizado!');
+        if(html.getAttribute('data-contexto') == 'foco'){
+            const evento = new CustomEvent('FocoFinalizado');
+            document.dispatchEvent(evento);
+        }
         zerar();
         return
     }
@@ -124,5 +129,7 @@ function mostrarTempo() {
     const tempoFormatado = tempo.toLocaleTimeString('pt-Br', {minute: '2-digit', second: '2-digit'})
     tempoNaTela.innerHTML = `${tempoFormatado}`
 }
+
+
 
 mostrarTempo();
